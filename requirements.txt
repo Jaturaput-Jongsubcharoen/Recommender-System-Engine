@@ -1,0 +1,18 @@
+# Core data handling
+numpy==1.24.4
+pandas==1.5.3
+
+# Visualization (for analysis report screenshots)
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# Association rule mining (Exercise 1)
+apyori==1.1.2
+
+# Machine learning & text processing (Exercise 2)
+scikit-learn==1.3.0
+
+# Optional but helpful for JSON & gzip handling
+tqdm==4.66.1
+
+ipykernel
