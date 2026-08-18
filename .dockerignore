@@ -1,0 +1,9 @@
+.git
+.github
+**/.env
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+frontend/dist
+docs
+meta_Digital_Music.json.gz
