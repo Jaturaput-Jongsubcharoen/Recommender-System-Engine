@@ -11,7 +11,7 @@ class MusicRecommender:
     def search_titles(self, query: str, limit: int = 10) -> list[str]:
         normalized = query.strip().lower()
         if not normalized:
-            return []
+            return list(self._recommendations)[:limit]
         return [
             title for title in self._recommendations if normalized in title.lower()
         ][:limit]

@@ -3,7 +3,7 @@ WORKDIR /app
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
-COPY recipes.json music_recommendations.json ./
+COPY recipes.json music_recommendations.json music_search_corpus.json.gz ./
 WORKDIR /app/backend
 EXPOSE 8000
 CMD ["python", "run.py"]
