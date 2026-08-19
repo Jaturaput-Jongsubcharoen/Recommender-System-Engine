@@ -1,4 +1,4 @@
-# Recommender System Engine
+# Search Ranking Recommender System
 
 An experimental search, ranking, and recommendation platform combining machine learning, information retrieval, explainable ranking, and lightweight local personalization.
 
