@@ -1,9 +1,12 @@
 import React, { useEffect, useId, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { api } from './api'
+import SearchExperience from './SearchExperience'
+import ExampleSuggestions from './ExampleSuggestions'
 import './styles.css'
 
 const technologies = ['Python', 'FastAPI', 'React', 'Apriori', 'TF-IDF', 'Cosine Similarity']
+const musicExamples = ['Piano Music To Dream By', "1970's Classic Rock", 'Celtic Worship: Live from Ireland']
 
 const collageVariants = [
   { bg: '#E94D45', color: '#FAF8E9', font: 'Impact, Arial Black, sans-serif', weight: 700, style: 'normal', rotation: '-2deg', x: '-1px', y: '1px', scale: .98, width: '88%', height: '90%', size: '86%', shape: 'polygon(2% 4%, 98% 0, 96% 98%, 0 94%)' },
@@ -69,12 +72,8 @@ function Icon({ type }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17V9m4 11V4m5 13V7m5 10v-6"/></svg>
 }
 
-function Status({ online }) {
-  return <div className={`status ${online === true ? 'online' : online === false ? 'offline' : ''}`} role="status"><span className="status-dot" /> API {online === null ? 'Checking' : online ? 'Online' : 'Offline'}</div>
-}
-
 function NetworkVisual() {
-  return <div className="network" aria-hidden="true"><span className="hero-crop-type">RECOMMEND</span><span className="hero-index">RSE / 01—02</span><svg className="hero-object" viewBox="0 0 520 390"><rect className="hero-red-block" x="238" y="52" width="210" height="210" transform="rotate(45 343 157)"/><circle className="hero-disc" cx="260" cy="205" r="118"/><circle className="hero-disc-line" cx="260" cy="205" r="78"/><circle className="hero-center" cx="260" cy="205" r="20"/><path className="draw-line" d="M75 274c72-123 189-172 351-122M394 126l35 24-37 21"/><path className="draw-line thin" d="M87 310c105 31 230 23 345-18"/></svg><span className="hero-script">match / discover</span><span className="hero-object-label">ASSOCIATION<br/>SIMILARITY<br/>RANKING</span></div>
+  return <div className="network" aria-hidden="true"><span className="hero-crop-type">RECOMMEND</span><span className="hero-index">RSE / 01—02</span><svg className="hero-object" viewBox="0 0 520 390"><rect className="hero-red-block" x="238" y="52" width="210" height="210" transform="rotate(45 343 157)"/><g className="hero-eye"><circle className="hero-disc" cx="260" cy="205" r="118"/><circle className="hero-disc-line" cx="260" cy="205" r="78"/><circle className="hero-center" cx="260" cy="205" r="20"/></g><path className="draw-line" d="M75 274c72-123 189-172 351-122M394 126l35 24-37 21"/><path className="draw-line thin" d="M87 310c105 31 230 23 345-18"/></svg><span className="hero-script">match / discover</span><span className="hero-object-label">ASSOCIATION<br/>SIMILARITY<br/>RANKING</span></div>
 }
 
 function EngineArtwork({ type }) {
@@ -125,9 +124,14 @@ function AssociationRule({ rule }) {
 
 function PlainHowExplanations() {
   return <div className="how-explainers" aria-label="Recommendation models in plain English">
+    <article><span>Search, retrieval & ranking · plain English</span><h3>How does catalog search work?</h3><p>The system takes a natural-language query, finds a larger group of potentially relevant music, scores those candidates using lexical and semantic signals, then re-ranks them to return the strongest Top-K results.</p></article>
     <article><span>Cuisine model · plain English</span><h3>How does the cuisine recommender work?</h3><p>The system examines recipe ingredient combinations and looks for patterns. If certain ingredients repeatedly appear together, Apriori identifies that relationship and measures how reliable it is.</p></article>
     <article><span>Music model · plain English</span><h3>How does the music recommender work?</h3><p>The system compares descriptive information about music. TF-IDF converts that information into numerical features, and cosine similarity measures which titles are most alike.</p></article>
   </div>
+}
+
+function SearchAlgorithmCard() {
+  return <article className="search-algorithm-card"><div className="algorithm-top"><Icon type="music"/><span>SEARCH · RETRIEVAL & RANKING</span></div><h3>Natural-Language Catalog Search</h3><p>Starts from a description, retrieves a broad candidate set, calculates supported relevance features, ranks the candidates, and applies diversity-aware re-ranking.</p><div className="pipeline"><span>Query</span><i>↓</i><span>Retrieval</span><i>↓</i><span>Candidates</span><i>↓</i><span>Ranking</span><i>↓</i><span>Re-ranking</span><i>↓</i><span>Top-K Results</span></div><div className="retrieval-mode-notes"><div><strong>Lexical</strong><p>Matches words and text features using TF-IDF.</p></div><div><strong>Semantic</strong><p>Finds conceptually similar content even when exact words differ.</p></div><div><strong>Hybrid</strong><p>Combines lexical, semantic, and available metadata signals.</p></div></div><p className="personalization-note">When personalization is enabled, locally stored preference terms and interactions can adjust ranking scores.</p></article>
 }
 
 function CuisineEngine({ cuisines, onError }) {
@@ -138,6 +142,8 @@ function CuisineEngine({ cuisines, onError }) {
   const [open, setOpen] = useState(false)
   const [activeOption, setActiveOption] = useState(-1)
   const matchingCuisines = cuisines.filter(item => item.toLowerCase().includes(cuisine.trim().toLowerCase()))
+  const preferredExamples = ['french', 'thai', 'mexican']
+  const cuisineExamples = preferredExamples.map(preferred => cuisines.find(item => item.toLowerCase() === preferred)).filter(Boolean)
 
   function chooseCuisine(value) {
     setCuisine(value)
@@ -166,7 +172,7 @@ function CuisineEngine({ cuisines, onError }) {
     <div className="card-heading"><div className="icon-box violet"><Icon type="cuisine" /></div><div><span className="kicker">APRIORI · ASSOCIATION RULES</span><h2>Cuisine Patterns</h2></div></div>
     <p className="card-copy">Discover ingredients that frequently belong together using Apriori association rules.</p>
     <EngineArtwork type="cuisine" />
-    <form onSubmit={submit}><label htmlFor="cuisine-input">Search supported cuisines</label><div className="input-row"><div className="cuisine-search"><input id="cuisine-input" value={cuisine} onChange={(event) => { setCuisine(event.target.value); setOpen(true); setActiveOption(-1) }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 120)} onKeyDown={handleCuisineKeys} placeholder="Try Italian, Thai, Mexican…" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={listId}/><span className="select-arrow" aria-hidden="true">▾</span>{open && matchingCuisines.length > 0 && <div className="cuisine-options" id={listId} role="listbox">{matchingCuisines.map((item, index) => <button type="button" role="option" aria-selected={index === activeOption} className={index === activeOption ? 'active' : ''} key={item} onMouseDown={(event) => event.preventDefault()} onClick={() => chooseCuisine(item)}>{item}</button>)}</div>}</div><button className="primary" disabled={loading}>{loading && <span className="spinner"/>}{loading ? 'Analyzing…' : 'Analyze Cuisine'}</button></div><p className="input-hint">{cuisines.length ? `${cuisines.length} cuisines available` : 'Loading supported cuisines…'}</p></form>
+    <form onSubmit={submit}><label htmlFor="cuisine-input">Search supported cuisines</label><div className="input-row"><div className="cuisine-search"><input id="cuisine-input" value={cuisine} onChange={(event) => { setCuisine(event.target.value); setOpen(true); setActiveOption(-1) }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 120)} onKeyDown={handleCuisineKeys} placeholder="Try Italian, Thai, Mexican…" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={listId}/><span className="select-arrow" aria-hidden="true">▾</span>{open && matchingCuisines.length > 0 && <div className="cuisine-options" id={listId} role="listbox">{matchingCuisines.map((item, index) => <button type="button" role="option" aria-selected={index === activeOption} className={index === activeOption ? 'active' : ''} key={item} onMouseDown={(event) => event.preventDefault()} onClick={() => chooseCuisine(item)}>{item}</button>)}</div>}</div><button className="primary" disabled={loading}>{loading && <span className="spinner"/>}{loading ? 'Analyzing…' : 'Analyze Cuisine'}</button></div><ExampleSuggestions examples={cuisineExamples} onSelect={chooseCuisine} formatExample={readableIngredient} description="Supported cuisine examples"/><p className="input-hint">{cuisines.length ? `${cuisines.length} cuisines available` : 'Loading supported cuisines…'}</p></form>
     {loading && <div className="skeleton-stack" aria-label="Analyzing ingredient relationships"><span/><span/><span/></div>}
     {result && <div className="result-panel reveal"><header className="result-introduction"><span>Your Cuisine Analysis</span><h3>{readableIngredient(result.cuisine)} ingredient patterns</h3><p>We analyzed recipe patterns for {readableIngredient(result.cuisine)} cuisine to find ingredients that frequently appear together. Below are the strongest ingredient relationships discovered by the Apriori model.</p></header><div className="result-label"><span>Frequently Paired Ingredients</span><small>{result.cuisine}</small></div><p className="result-explanation">These ingredients frequently appear together in the {readableIngredient(result.cuisine)} recipes analyzed by the model.</p><div className="chips">{result.top_ingredients.length ? result.top_ingredients.map(item => <span key={item}>{readableIngredient(item)}</span>) : <p>No frequent ingredient group was found.</p>}</div><div className="result-flow" aria-label="How to read the results"><span>Ingredients we found</span><i>↓</i><span>When these appear</span><i>↓</i><span>Another ingredient often appears too</span><i>↓</i><span>Relationship strength</span></div><div className="rules-title"><h3>Association Rules</h3><span>{result.rules.length} relationships</span></div><div className="rules">{result.rules.length ? result.rules.slice(0, 8).map((rule, index) => <AssociationRule rule={rule} key={index}/>) : <p className="empty">No association rules exceeded the lift threshold for this cuisine.</p>}</div></div>}
   </article>
@@ -174,19 +180,16 @@ function CuisineEngine({ cuisines, onError }) {
 
 function MusicEngine({ onError }) {
   const [query, setQuery] = useState('')
-  const [titles, setTitles] = useState([])
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (query.trim().length < 2 || result?.title === query) { setTitles([]); return }
-    const timer = setTimeout(() => api.musicTitles(query).then(data => setTitles(data.titles)).catch(() => setTitles([])), 250)
-    return () => clearTimeout(timer)
-  }, [query, result])
+  function chooseTitle(title) {
+    setQuery(title); setResult(null)
+  }
 
   async function find(title = query) {
     if (!title.trim()) return onError('Enter a song or album title to continue.')
-    setQuery(title); setTitles([]); setResult(null); setLoading(true); onError('')
+    setQuery(title); setResult(null); setLoading(true); onError('')
     try { setResult(await api.musicRecommendations(title)) }
     catch (error) { onError(error.status === 404 ? `We couldn't find recommendations for that title.` : 'The recommendation service is currently unavailable.') }
     finally { setLoading(false) }
@@ -194,9 +197,9 @@ function MusicEngine({ onError }) {
 
   return <article className="engine-card music-engine">
     <div className="card-heading"><div className="icon-box cyan"><Icon type="music" /></div><div><span className="kicker">TF-IDF · COSINE SIMILARITY</span><h2>Similar Sounds</h2></div></div>
-    <p className="card-copy">Discover related music using TF-IDF vectors and cosine similarity.</p>
+    <p className="card-copy">Start from a known music title and discover other titles with similar content features.</p>
     <EngineArtwork type="music" />
-    <form onSubmit={(event) => { event.preventDefault(); find() }}><label htmlFor="music-input">Search song or album title</label><div className="search-wrap"><div className="input-row"><input id="music-input" value={query} onChange={(event) => { setQuery(event.target.value); setResult(null) }} placeholder="Start typing a known title…" autoComplete="off"/><button type="button" className="clear" aria-label="Clear music search" onClick={() => { setQuery(''); setTitles([]); setResult(null) }}>×</button><button className="primary cyan-button" disabled={loading}>{loading && <span className="spinner"/>}{loading ? 'Finding…' : 'Find Similar Music'}</button></div>{titles.length > 0 && <div className="suggestions" role="listbox">{titles.map(title => <button type="button" role="option" key={title} onClick={() => find(title)}>{title}</button>)}</div>}</div><p className="input-hint">Autocomplete searches the recommendation index</p></form>
+    <form onSubmit={(event) => { event.preventDefault(); find() }}><label htmlFor="music-input">Enter a song or album title</label><div className="search-wrap"><div className="input-row"><div className="music-title-search"><input id="music-input" value={query} onChange={(event) => { setQuery(event.target.value); setResult(null) }} placeholder="Type a song or album title…" autoComplete="off"/><button type="button" className="clear" aria-label="Clear music title" onClick={() => { setQuery(''); setResult(null) }}>×</button></div><button className="primary cyan-button" disabled={loading}>{loading && <span className="spinner"/>}{loading ? 'Finding…' : 'Find Similar Music'}</button></div></div><ExampleSuggestions examples={musicExamples} onSelect={chooseTitle} description="Known music-title examples"/><p className="input-hint">Type a known catalog title, or use an example to get started.</p></form>
     {loading && <div className="skeleton-stack" aria-label="Finding similar music"><span/><span/><span/></div>}
     {result && <div className="result-panel reveal"><header className="result-introduction"><span>Your Music Recommendations</span><h3>Matches for “{result.title}”</h3><p>Based on the title you selected, the model compared its content features with the music catalog and ranked the most similar matches.</p></header><div className="result-label"><span>Ranked Similar Titles</span><small>most similar first</small></div><p className="result-explanation">Titles near the top are considered more closely related by the model. The API returns ranking order only, so no similarity percentage is shown.</p><ol className="music-list">{result.recommendations.map((title, index) => <li key={`${title}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{title}</strong><small>{index === 0 ? 'Closest content match' : `Similarity rank ${index + 1}`}</small></div></li>)}</ol></div>}
     <div className="tech-notes"><div><strong>TF-IDF</strong><p>Transforms descriptive text into weighted numerical features.</p></div><div><strong>Cosine Similarity</strong><p>Measures how similar two content vectors are.</p></div></div>
@@ -205,35 +208,48 @@ function MusicEngine({ onError }) {
 
 function App() {
   const [cuisines, setCuisines] = useState([])
-  const [online, setOnline] = useState(null)
   const [error, setError] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
 
   useEffect(() => {
-    api.health().then(() => setOnline(true)).catch(() => setOnline(false))
     api.cuisines().then(data => setCuisines(data.cuisines)).catch(() => setError('Unable to connect to the recommendation API. Please try again.'))
   }, [])
 
   useEffect(() => {
-    const sections = ['overview', 'how-it-works', 'cuisine', 'music'].map(id => document.getElementById(id)).filter(Boolean)
-    const observer = new IntersectionObserver(entries => {
-      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-      if (visible) setActiveSection(visible.target.id)
-    }, { rootMargin: '-20% 0px -55% 0px', threshold: [0, .15, .35, .6] })
-    sections.forEach(section => observer.observe(section))
-    return () => observer.disconnect()
+    const sections = ['overview', 'how-it-works', 'search', 'cuisine', 'music'].map(id => document.getElementById(id)).filter(Boolean)
+    let frameId = null
+
+    const updateActiveSection = () => {
+      frameId = null
+      const marker = window.scrollY + 66 + window.innerHeight * .22
+      const current = sections.reduce((active, section) => section.offsetTop <= marker ? section : active, sections[0])
+      if (current) setActiveSection(current.id)
+    }
+    const handleScroll = () => {
+      if (frameId === null) frameId = window.requestAnimationFrame(updateActiveSection)
+    }
+
+    updateActiveSection()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+      if (frameId !== null) window.cancelAnimationFrame(frameId)
+    }
   }, [])
 
   const closeMenu = () => setMenuOpen(false)
   return <div className="app-shell">
-    <nav className="nav"><a className="brand" href="#overview" onClick={() => setActiveSection('overview')}><span className="brand-mark"><i/><i/><i/></span><span>Recommender <b>System Engine</b></span></a><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="Toggle navigation"><span/><span/><span/></button><div className={`nav-links ${menuOpen ? 'open' : ''}`}><a className={activeSection === 'overview' ? 'active' : ''} aria-current={activeSection === 'overview' ? 'page' : undefined} onClick={() => { setActiveSection('overview'); closeMenu() }} href="#overview">Overview</a><a className={activeSection === 'how-it-works' ? 'active' : ''} aria-current={activeSection === 'how-it-works' ? 'page' : undefined} onClick={() => { setActiveSection('how-it-works'); closeMenu() }} href="#how-it-works">How It Works</a><a className={activeSection === 'cuisine' ? 'active' : ''} aria-current={activeSection === 'cuisine' ? 'page' : undefined} onClick={() => { setActiveSection('cuisine'); closeMenu() }} href="#cuisine">Cuisine</a><a className={activeSection === 'music' ? 'active' : ''} aria-current={activeSection === 'music' ? 'page' : undefined} onClick={() => { setActiveSection('music'); closeMenu() }} href="#music">Music</a></div></nav>
-    <main><section className="hero" id="overview"><div className="hero-copy"><div className="eyebrow"><span/> INTERACTIVE ML PROJECT · 2026</div><h1><span>Find Your Next</span><span className="collage-line"><CutWord variant="flavor">FLAVOR</CutWord><small>or</small><CutWord variant="sound">SOUND</CutWord></span></h1><p>Explore two recommendation approaches powered by association-rule mining and content-based similarity.</p><div className="badges">{technologies.map(tech => <span key={tech}>{tech.toUpperCase()}</span>)}</div><div className="actions"><a className="button primary" href="#cuisine">Explore Cuisine <span>→</span></a><a className="button secondary" href="#music">Explore Music <span>→</span></a></div></div><NetworkVisual/></section>
+    <nav className="nav"><a className="brand" href="#overview" onClick={() => setActiveSection('overview')}><span className="brand-mark"><i/><i/><i/></span><span>Recommender <b>System Engine</b></span></a><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="Toggle navigation"><span/><span/><span/></button><div className={`nav-links ${menuOpen ? 'open' : ''}`}><a className={activeSection === 'overview' ? 'active' : ''} aria-current={activeSection === 'overview' ? 'page' : undefined} onClick={() => { setActiveSection('overview'); closeMenu() }} href="#overview">Overview</a><a className={activeSection === 'how-it-works' ? 'active' : ''} aria-current={activeSection === 'how-it-works' ? 'page' : undefined} onClick={() => { setActiveSection('how-it-works'); closeMenu() }} href="#how-it-works">How It Works</a><a className={activeSection === 'search' ? 'active' : ''} aria-current={activeSection === 'search' ? 'page' : undefined} onClick={() => { setActiveSection('search'); closeMenu() }} href="#search">Search</a><a className={activeSection === 'cuisine' ? 'active' : ''} aria-current={activeSection === 'cuisine' ? 'page' : undefined} onClick={() => { setActiveSection('cuisine'); closeMenu() }} href="#cuisine">Cuisine</a><a className={activeSection === 'music' ? 'active' : ''} aria-current={activeSection === 'music' ? 'page' : undefined} onClick={() => { setActiveSection('music'); closeMenu() }} href="#music">Music</a></div></nav>
+    <main><section className="hero" id="overview"><div className="hero-copy"><div className="eyebrow"><span/> INTERACTIVE ML PROJECT · 2026</div><h1><span>Find Your Next</span><span className="collage-line"><CutWord variant="flavor">FLAVOR</CutWord><small>or</small><CutWord variant="sound">SOUND</CutWord></span></h1><p>Explore three recommendation and retrieval approaches powered by search ranking, association-rule mining, and content-based similarity.</p><div className="badges">{technologies.map(tech => <span key={tech}>{tech.toUpperCase()}</span>)}</div><div className="actions"><a className="button primary" href="#search">Explore Search <span>→</span></a><a className="button secondary" href="#cuisine">Explore Cuisine <span>→</span></a><a className="button secondary" href="#music">Explore Music <span>→</span></a></div><p className="creator-byline">Designed &amp; developed by <strong>Jaturaput (Mac) Jongsubcharoen</strong></p></div><NetworkVisual/></section>
       {error && <div className="global-error" role="alert"><span>!</span><p>{error}</p><button onClick={() => setError('')} aria-label="Dismiss error">×</button></div>}
-      <section className="how" id="how-it-works"><div className="intro"><span>HOW THE ENGINES THINK</span><h2>Two paths to a recommendation</h2><p>Clear, explainable machine-learning pipelines from raw data to useful matches.</p></div><PlainHowExplanations/><div className="algorithm-grid"><article><div className="algorithm-top"><Icon type="cuisine"/><span>CUISINE · ASSOCIATION MINING</span></div><h3>Apriori Association Rules</h3><p>Surfaces meaningful ingredient relationships from thousands of recipe transactions.</p><div className="pipeline"><span>Recipes</span><i>↓</i><span>Ingredient Transactions</span><i>↓</i><span>Apriori</span><i>↓</i><span>Association Rules</span><i>↓</i><span>Recommendations</span></div><div className="algorithm-tags"><span>Support</span><span>Confidence</span><span>Lift</span></div></article><article><div className="algorithm-top cyan-text"><Icon type="music"/><span>MUSIC · CONTENT-BASED</span></div><h3>Content-Based Recommendation</h3><p>Converts music metadata into a mathematical feature space for precise similarity ranking.</p><div className="pipeline"><span>Music Metadata</span><i>↓</i><span>Text Features</span><i>↓</i><span>TF-IDF</span><i>↓</i><span>Cosine Similarity</span><i>↓</i><span>Top Matches</span></div><div className="algorithm-tags cyan-tags"><span>Vectorization</span><span>Top 10 ranking</span></div></article></div><div className="system-strip"><span>REACT FRONTEND</span><i>→</i><span>FASTAPI REST API</span><i>→</i><span>RECOMMENDATION SERVICES</span><i>→</i><span>RESULTS</span></div></section>
-      <section className="engine-section cuisine-section" id="cuisine"><div className="intro"><span>01 · APRIORI RECOMMENDATION ENGINE</span><h2>Explore the Cuisine Model</h2><p>Start with cuisine patterns and uncover ingredients that frequently belong together.</p></div><div className="single-engine"><CuisineEngine cuisines={cuisines} onError={setError}/></div></section>
-      <section className="engine-section music-section" id="music"><div className="intro"><span>02 · CONTENT-BASED RECOMMENDATION ENGINE</span><h2>Explore the Music Model</h2><p>Search the music catalog and discover titles with similar content features.</p></div><div className="single-engine"><MusicEngine onError={setError}/></div></section>
-    </main><footer><div className="brand"><span className="brand-mark"><i/><i/><i/></span><span>Recommender System Engine</span></div><p>Built with Python · FastAPI · React · Docker · GitHub Actions</p></footer>
+      <section className="how" id="how-it-works"><div className="intro"><span>HOW THE ENGINES THINK</span><h2>Three paths to useful recommendations</h2><p>Beginner-friendly explanations paired with the technical machine-learning and retrieval pipelines.</p></div><PlainHowExplanations/><div className="algorithm-grid"><SearchAlgorithmCard/><article><div className="algorithm-top"><Icon type="cuisine"/><span>CUISINE · ASSOCIATION MINING</span></div><h3>Apriori Association Rules</h3><p>Surfaces meaningful ingredient relationships from thousands of recipe transactions.</p><div className="pipeline"><span>Recipes</span><i>↓</i><span>Ingredient Transactions</span><i>↓</i><span>Apriori</span><i>↓</i><span>Association Rules</span><i>↓</i><span>Recommendations</span></div><div className="algorithm-tags"><span>Support</span><span>Confidence</span><span>Lift</span></div></article><article><div className="algorithm-top cyan-text"><Icon type="music"/><span>MUSIC · CONTENT-BASED</span></div><h3>Content-Based Recommendation</h3><p>Converts music metadata into a mathematical feature space for precise similarity ranking.</p><div className="pipeline"><span>Music Metadata</span><i>↓</i><span>Text Features</span><i>↓</i><span>TF-IDF</span><i>↓</i><span>Cosine Similarity</span><i>↓</i><span>Top Matches</span></div><div className="algorithm-tags cyan-tags"><span>Vectorization</span><span>Top 10 ranking</span></div></article></div><div className="system-strip"><span>REACT FRONTEND</span><i>→</i><span>FASTAPI REST API</span><i>→</i><span>RECOMMENDATION SERVICES</span><i>→</i><span>RESULTS</span></div></section>
+      <SearchExperience onError={setError}/>
+      <section className="engine-section cuisine-section" id="cuisine"><div className="intro"><span>02 · APRIORI RECOMMENDATION ENGINE</span><h2>Explore the Cuisine Model</h2><p>Start with cuisine patterns and uncover ingredients that frequently belong together.</p></div><div className="single-engine"><CuisineEngine cuisines={cuisines} onError={setError}/></div></section>
+      <section className="engine-section music-section" id="music"><div className="intro"><span>03 · CONTENT-BASED RECOMMENDATION ENGINE</span><h2>Explore the Music Model</h2><p>Start from a known music title and discover other titles with similar content features.</p></div><div className="single-engine"><MusicEngine onError={setError}/></div></section>
+    </main><footer><div className="brand"><span className="brand-mark"><i/><i/><i/></span><span>Recommender System Engine</span></div><div className="footer-credit"><strong>By Jaturaput (Mac) Jongsubcharoen</strong><span>Built with Python · FastAPI · React · Docker · GitHub Actions</span></div></footer>
   </div>
 }
 

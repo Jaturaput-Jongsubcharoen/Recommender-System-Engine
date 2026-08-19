@@ -1,8 +1,8 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
-async function request(path) {
+async function request(path, options = {}) {
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`)
+    const response = await fetch(`${API_BASE_URL}${path}`, options)
     const contentType = response.headers.get('content-type') || ''
     const data = contentType.includes('application/json') ? await response.json() : null
     if (!response.ok) {
@@ -26,4 +26,11 @@ export const api = {
   musicTitles: (query) => request(`/api/music/titles?q=${encodeURIComponent(query)}`),
   musicRecommendations: (title) =>
     request(`/api/recommendations/music?title=${encodeURIComponent(title)}`),
+  search: (payload) => request('/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }),
+  searchCapabilities: () => request('/api/search/capabilities'),
+  searchEvaluation: () => request('/api/search/evaluation'),
 }

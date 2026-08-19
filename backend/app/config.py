@@ -19,6 +19,9 @@ RECIPES_PATH = _path_from_env("RECIPES_PATH", REPOSITORY_DIR / "recipes.json")
 MUSIC_RECOMMENDATIONS_PATH = _path_from_env(
     "MUSIC_RECOMMENDATIONS_PATH", REPOSITORY_DIR / "music_recommendations.json"
 )
+MUSIC_SEARCH_CORPUS_PATH = _path_from_env(
+    "MUSIC_SEARCH_CORPUS_PATH", REPOSITORY_DIR / "music_search_corpus.json.gz"
+)
 
 
 def cors_origins() -> list[str]:

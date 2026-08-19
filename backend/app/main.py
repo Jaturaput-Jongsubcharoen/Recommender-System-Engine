@@ -3,16 +3,19 @@ from functools import lru_cache
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import MUSIC_RECOMMENDATIONS_PATH, RECIPES_PATH, cors_origins
+from .config import MUSIC_RECOMMENDATIONS_PATH, MUSIC_SEARCH_CORPUS_PATH, RECIPES_PATH, cors_origins
+from .schemas import SearchRequest
 from .services.cuisine import CuisineRecommender
+from .services.evaluation import evaluation_status
 from .services.music import MusicRecommender
+from .services.search import SearchService, capability_status
 
 app = FastAPI(title="Recommendation System API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins(),
     allow_credentials=True,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -25,6 +28,18 @@ def cuisine_service() -> CuisineRecommender:
 @lru_cache(maxsize=1)
 def music_service() -> MusicRecommender:
     return MusicRecommender(MUSIC_RECOMMENDATIONS_PATH)
+
+
+@lru_cache(maxsize=1)
+def search_service() -> SearchService:
+    return SearchService(MUSIC_SEARCH_CORPUS_PATH, MUSIC_RECOMMENDATIONS_PATH)
+
+
+def require_search_service() -> SearchService:
+    try:
+        return search_service()
+    except (FileNotFoundError, OSError, ValueError) as error:
+        raise HTTPException(status_code=503, detail="The search index is currently unavailable.") from error
 
 
 @app.get("/api/health")
@@ -56,3 +71,18 @@ def music_recommendations(title: str = Query(min_length=1, max_length=500)) -> d
     if result is None:
         raise HTTPException(status_code=404, detail=f"No recommendations for {title}")
     return result
+
+
+@app.post("/api/search")
+def search(request: SearchRequest) -> dict:
+    return require_search_service().search(request)
+
+
+@app.get("/api/search/capabilities")
+def search_capabilities() -> dict:
+    return capability_status(search_service.cache_info().currsize > 0)
+
+
+@app.get("/api/search/evaluation")
+def search_evaluation() -> dict:
+    return evaluation_status()
